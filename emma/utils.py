@@ -59,19 +59,21 @@ def setup_logging(
 def print_welcome_message(config: Config) -> None:
     """Imprime un mensaje de bienvenida."""
     welcome_text = f"""
-¡Bienvenido/a a Emma, {config.user_name}!
+Welcome to Emma, {config.user_name}!
 
-Una interfaz de chat para interactuar con modelos de Ollama.
+A chat interface for interacting with Ollama models.
     
-Modelo actual: [bold blue]{config.model}[/bold blue]
-Temperatura: [bold]{config.temperature}[/bold]
+Current model: [bold blue]{config.model}[/bold blue]
+Temperature: [bold]{config.temperature}[/bold]
     
-Comandos disponibles:
-  [bold green]exit, quit, salir[/bold green] - Salir de Emma
-  [bold green]clear, limpiar[/bold green] - Limpiar la pantalla
-  [bold green]help, ayuda[/bold green] - Mostrar ayuda adicional
+Available commands:
+  [bold green]/help[/bold green] - Show available commands
+  [bold green]/personality list[/bold green] - List available personalities
+  [bold green]/personality set <name>[/bold green] - Change personality
+  [bold green]/clear[/bold green] - Clear the screen
+  [bold green]/exit[/bold green] - Exit Emma
     
-¡Escribe tu mensaje y comienza a conversar!
+Start chatting by typing your message!
 """
     console.print(Panel(welcome_text, title="[bold]Emma v0.1.0[/bold]", 
                         border_style="green", expand=False))

@@ -39,56 +39,19 @@ class PersonalityType(str, Enum):
     EDUCATIONAL = "educativa"
 
 @app.command()
-def chat(
-    model: str = typer.Option("gemma3:1b", help="Modelo de Ollama a utilizar"),
-    personality: PersonalityType = typer.Option(PersonalityType.DEFAULT, help="Personalidad del asistente"),
-    temperature: float = typer.Option(0.7, help="Temperatura para la generación"),
-    memory: bool = typer.Option(True, help="Activar sistema de memoria"),
-    conversation_id: Optional[str] = typer.Option(None, help="ID de conversación a cargar"),
-    debug: bool = typer.Option(False, "--debug", "-d", help="Activar modo de depuración")
-):
-    """Inicia una sesión de chat interactiva con configuraciones avanzadas."""
-    # Configurar nivel de logging si está en modo debug
-    if debug:
-        logger.setLevel(logging.DEBUG)
-        logging.getLogger("emma").setLevel(logging.DEBUG)
-        logging.getLogger("requests").setLevel(logging.DEBUG)
-        console.print("[yellow]Modo de depuración activado[/yellow]")
-    
+def chat():
+    """Inicia una sesión de chat interactiva."""
     # Comprobar disponibilidad de Ollama
     if not check_ollama_availability():
-        console.print("[bold red]Error: No se pudo conectar con Ollama. Asegúrate de que esté en ejecución.[/bold red]")
+        console.print("[bold red]Error: Could not connect to Ollama. Make sure it's running.[/bold red]")
         return 1
     
     try:
         # Cargar configuración
         config = Config.from_file()
-        config.model = model
-        config.temperature = temperature
-        config.verbose = debug  # Usar el flag de debug para activar el modo verbose
         
         # Iniciar sesión de chat
         session = ChatSession(config)
-        
-        # Cambiar personalidad si es necesario
-        if personality.value != "default":
-            if session.change_personality(personality.value):
-                console.print(f"[green]Personalidad cambiada a: [bold]{personality.value}[/bold][/green]")
-            else:
-                console.print(f"[yellow]No se pudo cambiar a la personalidad: {personality.value}[/yellow]")
-        
-        # Cargar conversación anterior si se especificó
-        if conversation_id:
-            if session.load_conversation(conversation_id):
-                console.print(f"[green]Conversación cargada: [bold]{conversation_id}[/bold][/green]")
-            else:
-                console.print(f"[yellow]No se pudo cargar la conversación: {conversation_id}[/yellow]")
-        
-        # Inicializar memoria si está activada
-        mem = None
-        if memory:
-            mem = SimpleMemory(config.model_dump())
-            console.print("[green]Sistema de memoria activado[/green]")
         
         print_welcome_message(config)
         
@@ -97,58 +60,25 @@ def chat(
             user_input = Prompt.ask(f"\n[bold green]{config.user_name}[/bold green]")
             
             # Comandos especiales
-            if user_input.lower() in ["exit", "quit", "salir"]:
-                console.print("[bold yellow]¡Hasta luego![/bold yellow]")
+            if user_input.lower() == "/exit":
+                console.print("[bold yellow]Goodbye![/bold yellow]")
                 break
                 
-            if user_input.lower() in ["clear", "limpiar"]:
+            if user_input.lower() == "/clear":
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print_welcome_message(config)
                 continue
                 
-            if user_input.lower() in ["help", "ayuda"]:
+            if user_input.lower() == "/help":
                 show_help()
-                continue
-                
-            if user_input.lower().startswith("/memory"):
-                handle_memory_command(user_input, mem)
-                continue
-                
-            if user_input.lower().startswith("/system"):
-                print_system_info()
                 continue
                 
             if user_input.lower().startswith("/personality"):
                 handle_personality_command(user_input, session, config)
                 continue
-                
-            if user_input.lower().startswith("/conversations"):
-                convs = session.list_conversations()
-                format_conversation_list(convs)
-                continue
-            
-            # Buscar en memoria si está activada
-            memory_context = ""
-            if mem and len(user_input.split()) > 2:  # Solo buscar para consultas con más de 2 palabras
-                memories = mem.search(user_input)
-                if memories:
-                    memory_context = "\n\nInformación relevante de la memoria:\n"
-                    for m in memories:
-                        memory_context += f"- {m['key']}: {m['value']}\n"
-                    
-                    console.print(Panel(
-                        f"[italic]Encontré información relevante en la memoria que podría ser útil.[/italic]",
-                        title="[bold cyan]Memoria[/bold cyan]",
-                        border_style="cyan"
-                    ))
             
             # Obtener respuesta del modelo
-            if memory_context:
-                # Añadir contexto de memoria a la consulta
-                augmented_input = f"{user_input}\n\nContexto adicional: {memory_context}"
-                response = session.get_response(augmented_input)
-            else:
-                response = session.get_response(user_input)
+            response = session.get_response(user_input)
             
             # Mostrar respuesta
             if config.use_panels:
@@ -158,10 +88,10 @@ def chat(
                 console.print(f"[bold blue]Emma:[/bold blue] {response}")
             
     except KeyboardInterrupt:
-        console.print("\n[bold yellow]Sesión terminada por el usuario.[/bold yellow]")
+        console.print("\n[bold yellow]Session terminated by user.[/bold yellow]")
     except Exception as e:
         console.print(f"[bold red]Error: {str(e)}[/bold red]")
-        logger.error(f"Error en la ejecución: {str(e)}", exc_info=True)
+        logger.error(f"Error in execution: {str(e)}", exc_info=True)
         return 1
     
     return 0
@@ -257,31 +187,19 @@ def personalities(
 def show_help():
     """Muestra la ayuda de los comandos disponibles."""
     help_text = """
-Comandos disponibles:
+Available commands:
 
-[bold green]Básicos:[/bold green]
-  exit, quit, salir - Salir de Emma
-  clear, limpiar - Limpiar la pantalla
-  help, ayuda - Mostrar esta ayuda
+[bold green]Basic:[/bold green]
+  /help - Show this help
+  /clear - Clear the screen
+  /exit - Exit Emma
 
-[bold green]Sistema:[/bold green]
-  /system - Mostrar información del sistema
-
-[bold green]Personalidades:[/bold green]
-  /personality list - Listar personalidades disponibles
-  /personality set <nombre> - Cambiar a una personalidad
-  /personality info <nombre> - Ver detalles de una personalidad
-
-[bold green]Memoria:[/bold green]
-  /memory add <clave> <valor> - Añadir elemento a la memoria
-  /memory get <clave> - Obtener elemento de la memoria
-  /memory search <consulta> - Buscar en la memoria
-  /memory clear - Limpiar la memoria
-
-[bold green]Conversaciones:[/bold green]
-  /conversations - Listar conversaciones guardadas
-    """
-    console.print(Panel(help_text, title="[bold]Ayuda de Emma[/bold]", border_style="blue"))
+[bold green]Personality:[/bold green]
+  /personality list - List available personalities
+  /personality set <name> - Change personality
+  /personality info <name> - View personality details
+"""
+    console.print(Panel(help_text, title="[bold]Emma Help[/bold]", border_style="blue"))
 
 def handle_memory_command(command: str, memory):
     """Gestiona los comandos relacionados con la memoria."""

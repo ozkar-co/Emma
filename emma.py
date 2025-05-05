@@ -10,4 +10,8 @@ import sys
 from emma.cli import app
 
 if __name__ == "__main__":
-    sys.exit(app()) 
+    if len(sys.argv) == 1:
+        # No arguments: run chat by default
+        sys.exit(app(["chat"]))
+    else:
+        sys.exit(app()) 
