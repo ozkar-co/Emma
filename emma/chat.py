@@ -102,6 +102,29 @@ class ChatSession:
         if "Oz" not in system_prompt and config.user_name == "Oz":
             system_prompt += f" Estás interactuando con {config.user_name}, un usuario de la interfaz Emma."
             
+        # Añadir instrucciones sobre análisis de prompts y búsquedas
+        system_prompt += """
+        
+        Tu tarea es analizar el prompt del usuario y determinar si requiere una búsqueda.
+        Si el prompt requiere información que no está en tu conocimiento base, debes usar los siguientes comandos:
+        
+        Para búsquedas en internet/wikipedia:
+        <search>término de búsqueda</search>
+        
+        Para búsquedas en tu propia memoria interna:
+        <memory>término de búsqueda</memory>
+        
+        Para búsquedas en la base de datos/APIs:
+        <query>término de búsqueda</query>
+        
+        Ejemplos de prompts que requieren búsqueda:
+        - "¿Cuál es la capital de Francia?" -> <search>capital de Francia</search>
+        - "¿Qué es Python?" -> <search>Python programming language</search>
+        - "¿Cuál fue mi última conversación sobre IA?" -> <memory>última conversación IA</memory>
+        
+        Si el prompt no requiere búsqueda, responde normalmente.
+        """
+            
         self.conversation = Conversation(system_prompt)
         
         # Asegurarse de que la URL de la API no termina con una barra
@@ -125,9 +148,92 @@ class ChatSession:
         if config.save_conversations:
             os.makedirs(config.conversation_dir, exist_ok=True)
     
+    def analyze_prompt(self, user_input: str) -> str:
+        """Analiza el prompt del usuario para determinar si requiere búsqueda."""
+        # Preparar el prompt de análisis
+        analysis_prompt = f"""
+        Analiza el siguiente prompt del usuario y determina si requiere una búsqueda.
+        Si requiere búsqueda, responde con el comando de búsqueda apropiado.
+        Si no requiere búsqueda, responde con "NO_SEARCH".
+        
+        Prompt: {user_input}
+        """
+        
+        # Preparar la solicitud para Ollama
+        request_data = {
+            "model": self.config.model,
+            "messages": [
+                {"role": "system", "content": analysis_prompt}
+            ],
+            "options": {
+                "temperature": 0.1,  # Baja temperatura para respuestas más determinísticas
+                "num_predict": 100,
+                "top_p": 0.9,
+                "top_k": 40
+            },
+            "stream": False
+        }
+        
+        try:
+            # Hacer la solicitud a Ollama
+            response = requests.post(self.ollama_url, json=request_data)
+            response.raise_for_status()
+            
+            # Procesar la respuesta
+            response_data = response.json()
+            analysis_result = ""
+            
+            if "message" in response_data and "content" in response_data["message"]:
+                analysis_result = response_data["message"]["content"].strip()
+            elif "response" in response_data:
+                analysis_result = response_data["response"].strip()
+            
+            # Si el resultado no es "NO_SEARCH", asumimos que es un comando de búsqueda
+            if analysis_result != "NO_SEARCH":
+                return analysis_result
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error en el análisis del prompt: {str(e)}")
+            return None
+    
+    def process_search_commands(self, text: str) -> str:
+        """Procesa los comandos de búsqueda en el texto."""
+        import re
+        
+        def replace_search(match):
+            search_type = match.group(1)
+            query = match.group(2)
+            
+            if search_type == "search":
+                # Aquí iría la lógica para buscar en internet/wikipedia
+                return f"[Searching internet for: {query}]"
+            elif search_type == "memory":
+                # Aquí iría la lógica para buscar en la memoria interna
+                return f"[Searching memory for: {query}]"
+            elif search_type == "query":
+                # Aquí iría la lógica para buscar en bases de datos/APIs personalizadas
+                return f"[Querying database for: {query}]"
+            return match.group(0)
+        
+        # Patrón para encontrar comandos entre llaves
+        pattern = r'<([^>]+)>(.*?)</\1>'
+        return re.sub(pattern, replace_search, text)
+    
     def get_response(self, user_input: str) -> str:
         """Obtiene una respuesta del modelo de Ollama."""
-        # Añadir mensaje del usuario
+        # Analizar el prompt del usuario
+        search_command = self.analyze_prompt(user_input)
+        
+        if search_command:
+            # Si se requiere búsqueda, procesar el comando
+            processed_command = self.process_search_commands(search_command)
+            self.conversation.add_user_message(user_input)
+            self.conversation.add_assistant_message(processed_command)
+            return processed_command
+        
+        # Si no requiere búsqueda, proceder normalmente
         self.conversation.add_user_message(user_input)
         
         # Preparar la solicitud para Ollama
@@ -141,7 +247,7 @@ class ChatSession:
                 "top_p": self.config.top_p,
                 "top_k": self.config.top_k
             },
-            "stream": False  # Asegurarse de que no se usa streaming
+            "stream": False
         }
         
         if self.config.verbose:
@@ -158,15 +264,13 @@ class ChatSession:
                 if self.config.verbose:
                     logger.debug(f"Respuesta de Ollama: {json.dumps(response_data, indent=2)}")
                 
-                # Intentar extraer el mensaje del asistente con manejo de diferentes formatos
+                # Intentar extraer el mensaje del asistente
                 assistant_message = ""
                 if "message" in response_data and "content" in response_data["message"]:
                     assistant_message = response_data["message"]["content"]
                 elif "response" in response_data:
-                    # Formato alternativo que algunas versiones de Ollama pueden usar
                     assistant_message = response_data["response"]
                 else:
-                    # Si no podemos encontrar el mensaje en el formato esperado, intentamos buscar en cualquier clave
                     for key, value in response_data.items():
                         if isinstance(value, dict) and "content" in value:
                             assistant_message = value["content"]
@@ -177,19 +281,9 @@ class ChatSession:
             
             except json.JSONDecodeError as json_err:
                 logger.warning(f"Error al decodificar JSON: {str(json_err)}")
-                # Si hay un error al decodificar el JSON, intentamos usar la respuesta en texto plano
                 assistant_message = response.text.strip()
-                if assistant_message.startswith("{") and "}" in assistant_message:
-                    # Intenta extraer solo la primera parte JSON válida
-                    try:
-                        valid_json = assistant_message.split("}")[0] + "}"
-                        json_data = json.loads(valid_json)
-                        if "message" in json_data and "content" in json_data["message"]:
-                            assistant_message = json_data["message"]["content"]
-                    except:
-                        pass  # Si falla, mantenemos la respuesta en texto plano
             
-            # Si después de todos los intentos no tenemos una respuesta
+            # Si no tenemos una respuesta
             if not assistant_message:
                 logger.error("No se pudo obtener una respuesta del modelo")
                 assistant_message = "Lo siento, no pude generar una respuesta."
