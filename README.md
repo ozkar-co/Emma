@@ -2,7 +2,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/ozkar-co/Emma)
+[![Version](https://img.shields.io/badge/version-rev_250505-green.svg)](https://github.com/ozkar-co/Emma)
 
 Emma es una interfaz de chat inteligente en Python diseñada para interactuar con modelos de Ollama. Proporciona una experiencia de conversación natural con capacidades avanzadas de análisis de prompts, búsqueda inteligente y gestión de personalidades.
 
@@ -16,17 +16,6 @@ Emma es una interfaz de chat inteligente en Python diseñada para interactuar co
 - **Configuración Flexible**: Archivo YAML para personalización completa
 - **Gestión de Conversaciones**: Guardado automático de conversaciones
 
-### 🔄 **Parcialmente Implementado**
-- **Sistema de Memoria**: Estructura base implementada, pero no integrada en el chat principal
-- **Comandos de Memoria**: Funciones disponibles pero no activadas en la interfaz
-
-### 🚧 **Pendiente de Implementar**
-- **Búsquedas en Internet**: Integración con APIs de búsqueda/Wikipedia
-- **Búsquedas en Base de Datos**: Conexión con APIs personalizadas
-- **Memoria Inteligente**: Integración completa del sistema de memoria
-- **Interfaz Web**: Versión web de la aplicación
-- **Plugins**: Sistema de plugins para funcionalidades adicionales
-
 ## 📋 Tabla de Contenidos
 
 - [Instalación](#instalación)
@@ -35,7 +24,6 @@ Emma es una interfaz de chat inteligente en Python diseñada para interactuar co
 - [Comandos Disponibles](#comandos-disponibles)
 - [Personalidades](#personalidades)
 - [Sistema de Búsqueda](#sistema-de-búsqueda)
-- [Documentación Técnica](#documentación-técnica)
 - [Contribución](#contribución)
 - [Roadmap](#roadmap)
 - [Changelog](#changelog)
@@ -146,64 +134,51 @@ Emma: "[Searching memory for: última conversación IA]"
 
 ## 🤝 Contribución
 
-¡Las contribuciones son bienvenidas!
+¡Las contribuciones son bienvenidas! Aquí están los pasos fundamentales para contribuir:
 
-### Cómo Contribuir
+### Proceso de Contribución
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. **Fork del proyecto** y clona tu repositorio
+2. **Implementa tu feature** o mejora
+3. **Actualiza la documentación**:
+   - Si es una nueva característica importante, muévela del Roadmap a la lista de Features
+   - Actualiza el README.md según corresponda
+4. **Actualiza el Changelog** con los detalles de tus cambios
+5. **Si usaste una nueva librería**, añádela a la sección de Agradecimientos
+6. **Crea un Pull Request** con una descripción clara
 
-### Áreas de Contribución Prioritarias
+### Notas Importantes
 
-- [ ] Implementación de búsquedas en internet
-- [ ] Integración completa del sistema de memoria
-- [ ] Mejoras en la interfaz de usuario
-- [ ] Nuevas personalidades
-- [ ] Tests y documentación
+- Mantén el código simple y legible
+- Sigue las convenciones de nomenclatura existentes
+- Documenta cualquier nueva funcionalidad
+- Los cambios deben ser compatibles con la configuración actual
 
 ## 🗺️ Roadmap
 
-### Versión 0.2.0 (Próxima)
-- [ ] Integración con APIs de búsqueda web
-- [ ] Sistema de memoria completamente funcional
-- [ ] Mejoras en el análisis de prompts
-- [ ] Nuevas personalidades
+### 🎯 **Ruta Principal** - Contribuciones al Core
+- **Búsquedas en Internet**: Integración con APIs de búsqueda/Wikipedia
+- **Sistema de Memoria Inteligente**: Integración completa del sistema de memoria
+- **Búsquedas en Base de Datos**: Conexión con APIs personalizadas
+- **Mejoras en Análisis de Prompts**: Optimización del sistema de detección de búsquedas
+- **Sistema de Plugins**: Arquitectura para funcionalidades adicionales
 
-### Versión 0.3.0
-- [ ] Interfaz web básica
-- [ ] Sistema de plugins
-- [ ] Integración con bases de datos
-- [ ] Exportación de conversaciones
-
-### Versión 1.0.0
-- [ ] Interfaz web completa
-- [ ] Sistema de usuarios
-- [ ] API REST
-- [ ] Docker support
+### 🔬 **Ruta Alternativa** - Experimentos e Ideas
+- **Interfaz Web**: Versión web de la aplicación
+- **Generación de Imágenes**: Avatar con expresiones basadas en el mood del modelo
+- **GUI Desktop**: Interfaz gráfica nativa
+- **API REST**: Endpoints para integración externa
+- **Docker Support**: Containerización de la aplicación
+- **Exportación Avanzada**: Múltiples formatos de exportación de conversaciones
 
 ## 📝 Changelog
 
-### [0.1.0] - 2024-01-XX
-#### Añadido
-- Sistema de chat interactivo básico
-- Análisis inteligente de prompts
-- Comandos de búsqueda automáticos
-- Sistema de personalidades
-- Configuración mediante YAML
-- Gestión de conversaciones
+Para ver el historial completo de cambios, consulta el archivo [CHANGELOG.md](CHANGELOG.md).
 
-#### Cambiado
-- Interfaz completamente en inglés
-- Comandos con prefijo `/`
-- Entrada directa en modo chat
-
-#### Eliminado
-- Argumentos de línea de comandos
-- Comandos de memoria no integrados
-- Funcionalidades de depuración complejas
+### Versión Actual: rev_250505
+- Análisis de prompts inteligente
+- Procesamiento de comandos de búsqueda
+- Mejoras en la experiencia de usuario
 
 ## 📄 Licencia
 
