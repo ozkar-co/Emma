@@ -2,7 +2,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-rev_250505-green.svg)](https://github.com/ozkar-co/Emma)
+[![Version](https://img.shields.io/badge/version-rev_250717-green.svg)](https://github.com/ozkar-co/Emma)
 
 Emma es una interfaz de chat inteligente en Python diseñada para interactuar con modelos de Ollama. Proporciona una experiencia de conversación natural con capacidades avanzadas de análisis de prompts, búsqueda inteligente y gestión de personalidades.
 
@@ -157,28 +157,41 @@ Emma: "[Searching memory for: última conversación IA]"
 ## 🗺️ Roadmap
 
 ### 🎯 **Ruta Principal** - Contribuciones al Core
-- **Búsquedas en Internet**: Integración con APIs de búsqueda/Wikipedia
-- **Sistema de Memoria Inteligente**: Integración completa del sistema de memoria
-- **Búsquedas en Base de Datos**: Conexión con APIs personalizadas
-- **Mejoras en Análisis de Prompts**: Optimización del sistema de detección de búsquedas
-- **Sistema de Plugins**: Arquitectura para funcionalidades adicionales
+
+#### **Arquitectura Modular**
+- **Refactorización del Core**: Arquitectura modular para mejor mantenibilidad
+- **Adapter LLM Base**: Interfaz base y adaptadores para Ollama, OpenAI, Gemini
+- **System Prompts Separados**: Archivos individuales para cada personalidad
+
+#### **Interfaz y Memoria**
+- **STT/TTS Básico**: Comandos de voz iniciales (Speech-to-Text / Text-to-Speech)
+- **Memoria Contextual**: Sistema básico de memoria contextual
+- **Memoria Avanzada**: Base de datos local con embeddings locales
+- **Consulta por Relevancia**: Búsqueda en memoria previa por similitud
 
 ### 🔬 **Ruta Alternativa** - Experimentos e Ideas
-- **Interfaz Web**: Versión web de la aplicación
-- **Generación de Imágenes**: Avatar con expresiones basadas en el mood del modelo
-- **GUI Desktop**: Interfaz gráfica nativa
+
+#### **Expansión de Capacidades**
+- **Motor LLM Dinámico**: Selección dinámica entre local/remoto
+- **Medición de Tokens**: Estimación de tokens por interacción
+- **GUI Gráfica**: Interfaz gráfica de usuario
+- **Plugin de Emociones**: Avatar visual con expresiones basadas en el mood
+
+#### **Integraciones Futuras**
+- **Búsquedas en Internet**: APIs de búsqueda/Wikipedia
+- **Búsquedas en Base de Datos**: Conexiones con APIs personalizadas
+- **Sistema de Plugins**: Arquitectura para funcionalidades adicionales
 - **API REST**: Endpoints para integración externa
 - **Docker Support**: Containerización de la aplicación
-- **Exportación Avanzada**: Múltiples formatos de exportación de conversaciones
 
 ## 📝 Changelog
 
 Para ver el historial completo de cambios, consulta el archivo [CHANGELOG.md](CHANGELOG.md).
 
-### Versión Actual: rev_250505
-- Análisis de prompts inteligente
-- Procesamiento de comandos de búsqueda
-- Mejoras en la experiencia de usuario
+### Versión Actual: rev_250717
+- Sistema de versionado por fechas
+- Documentación completamente renovada
+- Roadmap detallado con ruta principal y alternativa
 
 ## 📄 Licencia
 

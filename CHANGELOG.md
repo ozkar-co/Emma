@@ -5,6 +5,25 @@ Todas las notables mejoras y cambios en este proyecto serán documentadas en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [rev_250717] - 2025-07-17
+
+### Añadido
+- **Sistema de versionado por fechas**: Nuevo formato `rev_YYMMDD` para mejor seguimiento del desarrollo
+- **Archivo LICENSE.md**: Licencia MIT oficial del proyecto
+- **Roadmap detallado**: Estructura clara con ruta principal y alternativa
+- **Documentación mejorada**: README completamente renovado con mejor estructura
+
+### Cambiado
+- **Formato de versionado**: Migración de versiones semánticas a fechas (rev_250717)
+- **Estructura del README**: Reorganización completa con tabla de contenidos y secciones claras
+- **Proceso de contribución**: Simplificación y clarificación del flujo de contribución
+- **Roadmap reorganizado**: Separación entre contribuciones al core y experimentos
+
+### Mejorado
+- **Claridad de documentación**: Instrucciones más claras y ejemplos mejorados
+- **Navegación**: Tabla de contenidos para mejor acceso a secciones
+- **Gestión de features**: Separación clara entre lo implementado y lo pendiente
+
 ## [rev_250505] - 2025-05-05
 
 ### Añadido
