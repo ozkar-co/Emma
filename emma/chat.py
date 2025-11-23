@@ -11,6 +11,7 @@ from datetime import datetime
 from .config import Config
 from .core.types import Conversation, Message
 from .adapters import OllamaAdapter
+from .personalities import PersonalityManager
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +19,13 @@ logger = logging.getLogger(__name__)
 class ChatSession:
     """Chat session for Emma - Refactored for modular architecture."""
     
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, personality_manager: Optional[PersonalityManager] = None):
         self.config = config
         self.llm_adapter = OllamaAdapter(config)
+        self.personality_manager = personality_manager or PersonalityManager()
         
         # Initialize conversation with default personality
-        system_prompt = config.get_personality("default")
+        system_prompt = self.personality_manager.get_personality("default")
         self.conversation = Conversation()
         if system_prompt:
             self.conversation.add_system_message(system_prompt)
@@ -71,7 +73,7 @@ class ChatSession:
         """Change the personality of the session."""
         try:
             # Get new personality prompt
-            new_prompt = self.config.get_personality(personality_name)
+            new_prompt = self.personality_manager.get_personality(personality_name)
             if not new_prompt:
                 logger.warning(f"Personality '{personality_name}' not found")
                 return False

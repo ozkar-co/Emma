@@ -26,14 +26,7 @@ DEFAULT_CONFIG = {
     "ollama_host": "http://localhost:11434",
     "api_key": "",
     "user_name": "Tú",
-    "use_panels": True,
-    "personalities": {
-        "default": "Eres Emma, una asistente virtual inteligente y amigable.",
-        "creativa": "Eres Emma, una asistente creativa con gran imaginación.",
-        "técnica": "Eres Emma, una asistente técnica experta en programación y tecnología.",
-        "concisa": "Eres Emma, una asistente que proporciona respuestas breves y directas.",
-        "educativa": "Eres Emma, una asistente educativa que explica conceptos de manera clara y didáctica."
-    }
+    "use_panels": True
 }
 
 class Config(BaseModel):
@@ -53,7 +46,6 @@ class Config(BaseModel):
     api_key: str = Field(default="", description="Clave de API (si es necesaria)")
     user_name: str = Field(default="Tú", description="Nombre a mostrar para el usuario en el chat")
     use_panels: bool = Field(default=True, description="Mostrar mensajes de Emma en paneles/recuadros")
-    personalities: Dict[str, str] = Field(default_factory=dict, description="Diccionario de personalidades disponibles")
 
     @classmethod
     def from_file(cls, file_path: str = "config.yaml") -> 'Config':
@@ -76,6 +68,7 @@ class Config(BaseModel):
         
         return cls(**config_data)
     
+    
     def save(self, file_path: str = "config.yaml") -> bool:
         """Guarda la configuración en un archivo YAML."""
         try:
@@ -84,19 +77,4 @@ class Config(BaseModel):
             return True
         except Exception as e:
             logger.error(f"Error al guardar la configuración: {str(e)}")
-            return False
-    
-    def get_personality(self, name: str = "default") -> str:
-        """Obtiene una personalidad por su nombre."""
-        return self.personalities.get(name, self.system_prompt)
-    
-    def add_personality(self, name: str, prompt: str) -> None:
-        """Añade una nueva personalidad."""
-        self.personalities[name] = prompt
-    
-    def remove_personality(self, name: str) -> bool:
-        """Elimina una personalidad."""
-        if name in self.personalities and name != "default":
-            del self.personalities[name]
-            return True
-        return False 
+            return False 

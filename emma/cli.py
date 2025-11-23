@@ -16,6 +16,7 @@ import logging
 from .config import Config
 from .chat import ChatSession
 from .memory import SimpleMemory, ConversationMemory
+from .personalities import PersonalityManager
 from .utils import (
     setup_logging, 
     print_welcome_message, 
@@ -50,8 +51,11 @@ def chat():
         # Load configuration
         config = Config.from_file()
         
+        # Initialize PersonalityManager
+        personality_manager = PersonalityManager()
+        
         # Start chat session
-        session = ChatSession(config)
+        session = ChatSession(config, personality_manager)
         
         print_welcome_message(config)
         
@@ -74,7 +78,7 @@ def chat():
                 continue
                 
             if user_input.lower().startswith("/personality"):
-                handle_personality_command(user_input, session, config)
+                handle_personality_command(user_input, session, config, personality_manager)
                 continue
             
             # Get response from model
@@ -206,7 +210,7 @@ Available commands:
 """
     console.print(Panel(help_text, title="[bold]Emma Help[/bold]", border_style="blue"))
 
-def handle_personality_command(command: str, session, config):
+def handle_personality_command(command: str, session, config, personality_manager: PersonalityManager):
     """Handle personality-related commands."""
     parts = command.split()
     
@@ -221,7 +225,7 @@ def handle_personality_command(command: str, session, config):
         table.add_column("Name", style="cyan")
         table.add_column("Description", style="green")
         
-        personalities = config.list_personalities()
+        personalities = personality_manager.list_personalities()
         for personality in personalities:
             table.add_row(personality['name'], personality['description'])
         
@@ -244,7 +248,7 @@ def handle_personality_command(command: str, session, config):
             return
         
         personality_name = parts[2]
-        personality_info = config.get_personality_info(personality_name)
+        personality_info = personality_manager.get_personality_info(personality_name)
         
         if personality_info:
             console.print(Panel(
