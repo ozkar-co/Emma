@@ -35,7 +35,19 @@ Emma es una interfaz de chat inteligente en Python diseñada para interactuar co
 ### Requisitos Previos
 - Python 3.8 o superior
 - Ollama instalado y configurado
-- Modelo gemma3:1b (o compatible) en Ollama
+- Modelo compatible en Ollama (ver recomendaciones abajo)
+
+#### Modelos Recomendados
+
+| Modelo | Tamaño | Velocidad | Instrucciones | Personalidad | Recomendación |
+|--------|--------|-----------|---------------|--------------|---------------|
+| llama3.2:3b | 3 GB | ⚡⚡ | ✅ Bueno | ✅ Funciona bien | ⭐ RECOMENDADO |
+| qwen2.5:7b | 4.7 GB | ⚡ | ⭐ Excelente | ⭐ Excelente | ⭐ Mejor para herramientas |
+| mistral:7b | 4.1 GB | ⚡⚡ | ✅ Bueno | ✅ Funciona | ✅ Buena opción |
+| llama3.1:8b | 4.7 GB | ⚡ | ✅ Muy bueno | ✅ Muy bueno | ✅ Máxima calidad |
+| gemma3:1b | 815 MB | ⚡⚡⚡ | ❌ Pobre | ❌ No funciona | ❌ NO recomendado |
+
+**Nota**: Los modelos pequeños (<3B parámetros) tienen dificultades para mantener personalidades y seguir instrucciones complejas.
 
 ### Pasos de Instalación
 

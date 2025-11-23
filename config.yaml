@@ -1,17 +1,14 @@
-# Configuración para Emma - Refactored for Modular Architecture
-# ===========================================================
 
 # Configuración del modelo
-model: "gemma3:1b"
+model: "llama3.2:3b"
 temperature: 0.7
-max_tokens: 800        # Reducido para evitar problemas con modelos más pequeños
+max_tokens: 2000        # Aumentado para modelos más capaces
 top_p: 0.9
 top_k: 40
-context_size: 2048     # Reducido para evitar problemas con modelos más pequeños
-
+context_size: 4096      # Aumentado para mejor contexto
 # Configuración de la conversación
 system_prompt: ""      # Ahora se maneja a través de archivos de personalidad
-chat_history_limit: 10  # Reducido para evitar exceder el contexto máximo
+chat_history_limit: 20  # Aumentado para mejor contexto con modelos más capaces
 save_conversations: true
 conversation_dir: "conversations"
 
