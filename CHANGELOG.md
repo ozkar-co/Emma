@@ -5,6 +5,29 @@ Todas las notables mejoras y cambios en este proyecto serán documentadas en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [rev_250718] - 2025-07-18
+
+### Añadido
+- **Arquitectura Modular Core**: Sistema base con interfaces abstractas para mejor mantenibilidad
+- **Adapter Ollama**: Implementación completa del adaptador para la API de Ollama
+- **Sistema de Personalidades Separado**: Archivos YAML individuales para cada personalidad
+- **Personality Manager**: Gestor de personalidades con carga automática desde archivos
+- **Core Types**: Tipos de datos centralizados (Message, Conversation, ChatSession)
+- **Base Classes**: Interfaces abstractas para configuración, adaptadores LLM y memoria
+
+### Cambiado
+- **Refactorización completa del Core**: Migración a arquitectura modular
+- **Configuración**: Sistema de configuración simplificado sin personalidades embebidas
+- **Gestión de Personalidades**: Movimiento de personalidades a archivos YAML separados
+- **Estructura del Proyecto**: Nueva organización con módulos core, adapters y personalities
+- **CLI**: Actualización para trabajar con el nuevo sistema de personalidades
+
+### Mejorado
+- **Mantenibilidad**: Código más modular y fácil de mantener
+- **Extensibilidad**: Fácil adición de nuevos adaptadores LLM
+- **Gestión de Personalidades**: Sistema más flexible y organizado
+- **Separación de Responsabilidades**: Cada módulo tiene una responsabilidad específica
+
 ## [rev_250717] - 2025-07-17
 
 ### Añadido

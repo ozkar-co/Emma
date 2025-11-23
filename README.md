@@ -2,7 +2,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-rev_250717-green.svg)](https://github.com/ozkar-co/Emma)
+[![Version](https://img.shields.io/badge/version-rev_250718-green.svg)](https://github.com/ozkar-co/Emma)
 
 Emma es una interfaz de chat inteligente en Python diseñada para interactuar con modelos de Ollama. Proporciona una experiencia de conversación natural con capacidades avanzadas de análisis de prompts, búsqueda inteligente y gestión de personalidades.
 
@@ -10,9 +10,11 @@ Emma es una interfaz de chat inteligente en Python diseñada para interactuar co
 
 ### ✅ **Implementado y Funcional**
 - **Chat Interactivo**: Interfaz de línea de comandos intuitiva
+- **Arquitectura Modular**: Core refactorizado con adaptadores LLM y sistema de personalidades separado
+- **Adapter Ollama**: Integración completa con la API de Ollama
 - **Análisis de Prompts**: Sistema inteligente que determina si una pregunta requiere búsqueda externa
 - **Comandos de Búsqueda**: Generación automática de comandos `<search>`, `<memory>`, `<query>`
-- **Sistema de Personalidades**: Múltiples personalidades predefinidas y configurables
+- **Sistema de Personalidades**: Archivos YAML separados para cada personalidad
 - **Configuración Flexible**: Archivo YAML para personalización completa
 - **Gestión de Conversaciones**: Guardado automático de conversaciones
 
@@ -158,10 +160,10 @@ Emma: "[Searching memory for: última conversación IA]"
 
 ### 🎯 **Ruta Principal** - Contribuciones al Core
 
-#### **Arquitectura Modular**
-- **Refactorización del Core**: Arquitectura modular para mejor mantenibilidad
-- **Adapter LLM Base**: Interfaz base y adaptadores para Ollama, OpenAI, Gemini
-- **System Prompts Separados**: Archivos individuales para cada personalidad
+#### **Arquitectura Modular** ✅ **COMPLETADO**
+- **Refactorización del Core**: Arquitectura modular para mejor mantenibilidad ✅
+- **Adapter LLM Base**: Interfaz base y adaptadores para Ollama ✅
+- **System Prompts Separados**: Archivos individuales para cada personalidad ✅
 
 #### **Interfaz y Memoria**
 - **STT/TTS Básico**: Comandos de voz iniciales (Speech-to-Text / Text-to-Speech)
@@ -188,7 +190,11 @@ Emma: "[Searching memory for: última conversación IA]"
 
 Para ver el historial completo de cambios, consulta el archivo [CHANGELOG.md](CHANGELOG.md).
 
-### Versión Actual: rev_250717
+### Versión Actual: rev_250718
+- **Refactorización completa del Core**: Arquitectura modular implementada
+- **Adapter Ollama**: Integración completa y modular con la API de Ollama
+- **Sistema de Personalidades Separado**: Archivos YAML individuales para cada personalidad
+- **Mejoras en la Configuración**: Sistema de configuración más limpio y modular
 - Sistema de versionado por fechas
 - Documentación completamente renovada
 - Roadmap detallado con ruta principal y alternativa

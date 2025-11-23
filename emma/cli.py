@@ -1,6 +1,5 @@
 """
-Módulo CLI para Emma.
-Proporciona una interfaz de línea de comandos extendida para Emma.
+CLI module for Emma - Refactored for modular architecture
 """
 
 import os
@@ -22,44 +21,45 @@ from .utils import (
     print_welcome_message, 
     print_system_info,
     format_conversation_list,
-    check_ollama_availability,
-    get_available_personalities
+    check_ollama_availability
 )
 
-app = typer.Typer(help="Emma - Interfaz extendida de comandos")
+app = typer.Typer(help="Emma - Extended command interface")
 console = Console()
 logger = setup_logging()
 
 class PersonalityType(str, Enum):
-    """Tipos de personalidad disponibles"""
+    """Available personality types"""
     DEFAULT = "default"
     CREATIVE = "creativa"
     TECHNICAL = "técnica"
     CONCISE = "concisa"
     EDUCATIONAL = "educativa"
+    SEXY = "sexy"
+    HOMUNCULUS = "homunculus"
 
 @app.command()
 def chat():
-    """Inicia una sesión de chat interactiva."""
-    # Comprobar disponibilidad de Ollama
+    """Start an interactive chat session."""
+    # Check Ollama availability
     if not check_ollama_availability():
         console.print("[bold red]Error: Could not connect to Ollama. Make sure it's running.[/bold red]")
         return 1
     
     try:
-        # Cargar configuración
+        # Load configuration
         config = Config.from_file()
         
-        # Iniciar sesión de chat
+        # Start chat session
         session = ChatSession(config)
         
         print_welcome_message(config)
         
-        # Bucle principal de chat
+        # Main chat loop
         while True:
             user_input = Prompt.ask(f"\n[bold green]{config.user_name}[/bold green]")
             
-            # Comandos especiales
+            # Special commands
             if user_input.lower() == "/exit":
                 console.print("[bold yellow]Goodbye![/bold yellow]")
                 break
@@ -77,10 +77,10 @@ def chat():
                 handle_personality_command(user_input, session, config)
                 continue
             
-            # Obtener respuesta del modelo
+            # Get response from model
             response = session.get_response(user_input)
             
-            # Mostrar respuesta
+            # Display response
             if config.use_panels:
                 console.print(Panel(response, title="[bold blue]Emma[/bold blue]", 
                                     border_style="blue", expand=False))
@@ -98,94 +98,92 @@ def chat():
 
 @app.command()
 def configure():
-    """Configuración interactiva de Emma."""
+    """Interactive configuration of Emma."""
     config = Config.from_file()
     
-    console.print("[bold]Configuración de Emma[/bold]")
+    console.print("[bold]Emma Configuration[/bold]")
     console.print("======================\n")
     
-    # Configuración del modelo
-    console.print("[bold cyan]Configuración del modelo[/bold cyan]")
-    config.model = Prompt.ask("Modelo", default=config.model)
-    config.temperature = float(Prompt.ask("Temperatura", default=str(config.temperature)))
-    config.max_tokens = int(Prompt.ask("Tokens máximos", default=str(config.max_tokens)))
+    # Model configuration
+    console.print("[bold cyan]Model Configuration[/bold cyan]")
+    config.model = Prompt.ask("Model", default=config.model)
+    config.temperature = float(Prompt.ask("Temperature", default=str(config.temperature)))
+    config.max_tokens = int(Prompt.ask("Max tokens", default=str(config.max_tokens)))
     
-    # Configuración de la conversación
-    console.print("\n[bold cyan]Configuración de la conversación[/bold cyan]")
-    config.system_prompt = Prompt.ask("Prompt del sistema", default=config.system_prompt)
-    config.save_conversations = Confirm.ask("¿Guardar conversaciones?", default=config.save_conversations)
+    # Conversation configuration
+    console.print("\n[bold cyan]Conversation Configuration[/bold cyan]")
+    config.save_conversations = Confirm.ask("Save conversations?", default=config.save_conversations)
     
-    # Configuración de Ollama
-    console.print("\n[bold cyan]Configuración de Ollama[/bold cyan]")
-    config.ollama_host = Prompt.ask("Host de Ollama", default=config.ollama_host)
+    # Ollama configuration
+    console.print("\n[bold cyan]Ollama Configuration[/bold cyan]")
+    config.ollama_host = Prompt.ask("Ollama host", default=config.ollama_host)
     
-    # Guardar configuración
+    # Save configuration
     if config.save():
-        console.print("\n[bold green]Configuración guardada correctamente.[/bold green]")
+        console.print("\n[bold green]Configuration saved successfully.[/bold green]")
     else:
-        console.print("\n[bold red]Error al guardar la configuración.[/bold red]")
+        console.print("\n[bold red]Error saving configuration.[/bold red]")
 
 @app.command()
 def personalities(
-    list_all: bool = typer.Option(False, "--list", "-l", help="Listar todas las personalidades"),
-    add: bool = typer.Option(False, "--add", "-a", help="Añadir una nueva personalidad"),
-    remove: str = typer.Option(None, "--remove", "-r", help="Eliminar una personalidad"),
-    view: str = typer.Option(None, "--view", "-v", help="Ver una personalidad")
+    list_all: bool = typer.Option(False, "--list", "-l", help="List all personalities"),
+    add: bool = typer.Option(False, "--add", "-a", help="Add a new personality"),
+    remove: str = typer.Option(None, "--remove", "-r", help="Remove a personality"),
+    view: str = typer.Option(None, "--view", "-v", help="View a personality")
 ):
-    """Gestiona las personalidades disponibles."""
+    """Manage available personalities."""
     config = Config.from_file()
     
     if list_all:
-        table = Table(title="Personalidades Disponibles")
-        table.add_column("Nombre", style="cyan")
-        table.add_column("Descripción", style="green")
+        table = Table(title="Available Personalities")
+        table.add_column("Name", style="cyan")
+        table.add_column("Description", style="green")
+        table.add_column("Preview", style="yellow")
         
-        for name, prompt in config.personalities.items():
-            description = prompt[:50] + "..." if len(prompt) > 50 else prompt
-            table.add_row(name, description)
+        personalities = config.list_personalities()
+        for personality in personalities:
+            table.add_row(
+                personality['name'],
+                personality['description'],
+                personality['prompt']
+            )
         
         console.print(table)
         return
     
     if view:
-        if view in config.personalities:
+        personality_info = config.get_personality_info(view)
+        if personality_info:
             console.print(Panel(
-                config.personalities[view],
-                title=f"[bold]Personalidad: {view}[/bold]",
+                personality_info['prompt'],
+                title=f"[bold]Personality: {personality_info['name']}[/bold]",
+                subtitle=f"Description: {personality_info['description']}",
                 border_style="green"
             ))
         else:
-            console.print(f"[bold red]La personalidad '{view}' no existe.[/bold red]")
+            console.print(f"[bold red]Personality '{view}' not found.[/bold red]")
         return
     
     if remove:
         if config.remove_personality(remove):
-            if config.save():
-                console.print(f"[bold green]Personalidad '{remove}' eliminada correctamente.[/bold green]")
-            else:
-                console.print("[bold red]Error al guardar la configuración.[/bold red]")
+            console.print(f"[bold green]Personality '{remove}' removed successfully.[/bold green]")
         else:
-            console.print(f"[bold red]No se pudo eliminar la personalidad '{remove}'.[/bold red]")
+            console.print(f"[bold red]Could not remove personality '{remove}'.[/bold red]")
         return
     
     if add:
-        name = Prompt.ask("Nombre de la nueva personalidad")
-        if name in config.personalities:
-            overwrite = Confirm.ask(f"La personalidad '{name}' ya existe. ¿Deseas sobrescribirla?")
-            if not overwrite:
-                return
+        name = Prompt.ask("Name of the new personality")
+        description = Prompt.ask("Description of the personality")
+        prompt = Prompt.ask("System prompt for this personality")
         
-        prompt = Prompt.ask("Prompt de sistema para esta personalidad")
-        config.add_personality(name, prompt)
-        
-        if config.save():
-            console.print(f"[bold green]Personalidad '{name}' añadida correctamente.[/bold green]")
+        if config.add_personality(name, prompt, description):
+            console.print(f"[bold green]Personality '{name}' added successfully.[/bold green]")
         else:
-            console.print("[bold red]Error al guardar la configuración.[/bold red]")
+            console.print("[bold red]Error adding personality.[/bold red]")
         return
 
 def show_help():
-    """Muestra la ayuda de los comandos disponibles."""
+    """Show help for available commands."""
     help_text = """
 Available commands:
 
@@ -198,114 +196,103 @@ Available commands:
   /personality list - List available personalities
   /personality set <name> - Change personality
   /personality info <name> - View personality details
+  /personality add <name> - Add new personality
+  /personality remove <name> - Remove personality
+
+[bold green]Memory:[/bold green]
+  /memory list - List saved conversations
+  /memory load <id> - Load a conversation
+  /memory clear - Clear current conversation
 """
     console.print(Panel(help_text, title="[bold]Emma Help[/bold]", border_style="blue"))
 
-def handle_memory_command(command: str, memory):
-    """Gestiona los comandos relacionados con la memoria."""
-    if memory is None:
-        console.print("[bold yellow]El sistema de memoria no está activado.[/bold yellow]")
-        return
-    
-    parts = command.split(maxsplit=2)
-    if len(parts) < 2:
-        console.print("[bold red]Comando incompleto. Usa 'help' para ver la sintaxis.[/bold red]")
-        return
-    
-    cmd = parts[1].lower()
-    
-    if cmd == "clear":
-        if memory.clear():
-            console.print("[bold green]Memoria limpiada correctamente.[/bold green]")
-        else:
-            console.print("[bold red]Error al limpiar la memoria.[/bold red]")
-    
-    elif cmd == "add" and len(parts) >= 3:
-        add_parts = parts[2].split(maxsplit=1)
-        if len(add_parts) < 2:
-            console.print("[bold red]Debes especificar clave y valor.[/bold red]")
-            return
-        
-        key, value = add_parts
-        if memory.add(key, value):
-            console.print(f"[bold green]Elemento añadido a la memoria: {key}[/bold green]")
-        else:
-            console.print("[bold red]Error al añadir a la memoria.[/bold red]")
-    
-    elif cmd == "get" and len(parts) >= 3:
-        key = parts[2]
-        value = memory.get(key)
-        if value is not None:
-            console.print(Panel(
-                f"{value}",
-                title=f"[bold]Memoria: {key}[/bold]",
-                border_style="green"
-            ))
-        else:
-            console.print(f"[bold yellow]No se encontró el elemento '{key}' en la memoria.[/bold yellow]")
-    
-    elif cmd == "search" and len(parts) >= 3:
-        query = parts[2]
-        results = memory.search(query)
-        
-        if not results:
-            console.print("[bold yellow]No se encontraron resultados.[/bold yellow]")
-            return
-        
-        table = Table(title=f"Resultados de búsqueda para '{query}'")
-        table.add_column("Clave", style="cyan")
-        table.add_column("Valor", style="green")
-        
-        for result in results:
-            table.add_row(result["key"], str(result["value"]))
-        
-        console.print(table)
-    
-    else:
-        console.print("[bold red]Comando de memoria no reconocido.[/bold red]")
-
 def handle_personality_command(command: str, session, config):
-    """Gestiona los comandos relacionados con las personalidades."""
-    parts = command.split(maxsplit=2)
+    """Handle personality-related commands."""
+    parts = command.split()
+    
     if len(parts) < 2:
-        console.print("[bold red]Comando incompleto. Usa 'help' para ver la sintaxis.[/bold red]")
+        console.print("[bold red]Usage: /personality <action> [name][/bold red]")
         return
     
-    cmd = parts[1].lower()
+    action = parts[1].lower()
     
-    if cmd == "list":
-        personalities = get_available_personalities(config)
+    if action == "list":
+        table = Table(title="Available Personalities")
+        table.add_column("Name", style="cyan")
+        table.add_column("Description", style="green")
         
-        table = Table(title="Personalidades Disponibles")
-        table.add_column("Nombre", style="cyan")
-        table.add_column("Descripción", style="green")
-        
-        for name, prompt in personalities.items():
-            description = prompt[:50] + "..." if len(prompt) > 50 else prompt
-            table.add_row(name, description)
+        personalities = config.list_personalities()
+        for personality in personalities:
+            table.add_row(personality['name'], personality['description'])
         
         console.print(table)
-    
-    elif cmd == "set" and len(parts) >= 3:
-        personality = parts[2]
-        if session.change_personality(personality):
-            console.print(f"[bold green]Personalidad cambiada a: {personality}[/bold green]")
+        
+    elif action == "set":
+        if len(parts) < 3:
+            console.print("[bold red]Usage: /personality set <name>[/bold red]")
+            return
+        
+        personality_name = parts[2]
+        if session.change_personality(personality_name):
+            console.print(f"[bold green]Changed personality to: {personality_name}[/bold green]")
         else:
-            console.print(f"[bold red]No se pudo cambiar a la personalidad: {personality}[/bold red]")
+            console.print(f"[bold red]Could not change to personality: {personality_name}[/bold red]")
     
-    elif cmd == "info" and len(parts) >= 3:
-        personality = parts[2]
-        if personality in config.personalities:
+    elif action == "info":
+        if len(parts) < 3:
+            console.print("[bold red]Usage: /personality info <name>[/bold red]")
+            return
+        
+        personality_name = parts[2]
+        personality_info = config.get_personality_info(personality_name)
+        
+        if personality_info:
             console.print(Panel(
-                config.personalities[personality],
-                title=f"[bold]Personalidad: {personality}[/bold]",
+                personality_info['prompt'],
+                title=f"[bold]Personality: {personality_info['name']}[/bold]",
+                subtitle=f"Description: {personality_info['description']}",
                 border_style="green"
             ))
         else:
-            console.print(f"[bold red]La personalidad '{personality}' no existe.[/bold red]")
+            console.print(f"[bold red]Personality '{personality_name}' not found.[/bold red]")
     
     else:
-        console.print("[bold red]Comando de personalidad no reconocido.[/bold red]")
+        console.print(f"[bold red]Unknown personality action: {action}[/bold red]")
+
+def handle_memory_command(command: str, memory):
+    """Handle memory-related commands."""
+    parts = command.split()
+    
+    if len(parts) < 2:
+        console.print("[bold red]Usage: /memory <action> [id][/bold red]")
+        return
+    
+    action = parts[1].lower()
+    
+    if action == "list":
+        conversations = memory.list_conversations()
+        if conversations:
+            format_conversation_list(conversations)
+        else:
+            console.print("[yellow]No saved conversations found.[/yellow]")
+    
+    elif action == "load":
+        if len(parts) < 3:
+            console.print("[bold red]Usage: /memory load <id>[/bold red]")
+            return
+        
+        conversation_id = parts[2]
+        if memory.load_conversation(conversation_id):
+            console.print(f"[bold green]Loaded conversation: {conversation_id}[/bold green]")
+        else:
+            console.print(f"[bold red]Could not load conversation: {conversation_id}[/bold red]")
+    
+    elif action == "clear":
+        memory.clear_conversation()
+        console.print("[bold green]Conversation cleared.[/bold green]")
+    
+    else:
+        console.print(f"[bold red]Unknown memory action: {action}[/bold red]")
 
 if __name__ == "__main__":
     app() 
